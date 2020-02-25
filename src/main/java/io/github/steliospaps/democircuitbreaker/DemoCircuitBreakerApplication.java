@@ -9,5 +9,6 @@ public class DemoCircuitBreakerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(DemoCircuitBreakerApplication.class, args);
 	}
+	
 
 }
