@@ -1,5 +1,7 @@
 package io.github.steliospaps.democircuitbreaker.server;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -12,9 +14,15 @@ import reactor.core.publisher.Mono;
 @Component
 public class GreetingHandler {
 
+  @Autowired
+  private RemoteCaller remoteCaller;
+	
   public Mono<ServerResponse> hello(ServerRequest request) {
-    return ServerResponse.ok().contentType(MediaType.APPLICATION_JSON)
-      .body(BodyInserters.fromValue(new Reply("Hello, Spring!")));
+    return remoteCaller.execute().flatMap(
+    			reply -> ServerResponse.ok()//
+    			.contentType(MediaType.APPLICATION_JSON)//
+    			.bodyValue(reply))//
+    		.onErrorResume(t -> ServerResponse.status(HttpStatus.BAD_GATEWAY).build());    		
   }
 }
 

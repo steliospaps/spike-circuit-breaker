@@ -91,7 +91,7 @@
           "orderByTime": "ASC",
           "policy": "default",
           "query": "SELECT sum(\"count\") FROM \"http_server_requests\" WHERE $timeFilter GROUP BY time($__interval), \"status\", \"uri\" fill(null)",
-          "rawQuery": true,
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -167,7 +167,7 @@
         "y": 0
       },
       "hiddenSeries": false,
-      "id": 4,
+      "id": 8,
       "interval": "",
       "legend": {
         "avg": false,
@@ -195,7 +195,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "alias": "$tag_level",
+          "alias": "$tag_status $tag_uri",
           "groupBy": [
             {
               "params": [
@@ -205,7 +205,13 @@
             },
             {
               "params": [
-                "level"
+                "status"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "uri"
               ],
               "type": "tag"
             },
@@ -216,9 +222,11 @@
               "type": "fill"
             }
           ],
-          "measurement": "logback_events",
+          "measurement": "remote_in-progress",
           "orderByTime": "ASC",
           "policy": "default",
+          "query": "SELECT sum(\"count\") FROM \"http_server_requests\" WHERE $timeFilter GROUP BY time($__interval), \"status\", \"uri\" fill(null)",
+          "rawQuery": false,
           "refId": "A",
           "resultFormat": "time_series",
           "select": [
@@ -242,7 +250,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Log Events",
+      "title": "remote",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -262,7 +270,7 @@
           "label": null,
           "logBase": 1,
           "max": null,
-          "min": null,
+          "min": "0",
           "show": true
         },
         {
@@ -450,10 +458,137 @@
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 12,
         "x": 12,
         "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 4,
+      "interval": "",
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_level",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "level"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "logback_events",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Log Events",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
       },
       "hiddenSeries": false,
       "id": 7,
@@ -575,7 +710,7 @@
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
