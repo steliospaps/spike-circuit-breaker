@@ -52,7 +52,8 @@ public class LoadGeneratorCommandLineRunner implements CommandLineRunner {
 				.map(i -> System.nanoTime())
 				.flatMap(ts -> client.get()//
 						.exchange()//
-						.map(e -> e.statusCode().is2xxSuccessful())
+						.flatMap(r -> r.toBodilessEntity()//
+								.map(re -> !re.getStatusCode().isError()))
 						.onErrorReturn(false)//
 						.map(isSuccess -> Tuples.of(System.nanoTime() - ts, isSuccess))//
 						,1)

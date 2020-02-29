@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import io.github.steliospaps.democircuitbreaker.server.RemoteCaller;
 import io.github.steliospaps.democircuitbreaker.server.dto.Reply;
+import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.Timer;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -33,6 +35,7 @@ public class SystemSlowerUnderLoadEmulatingRemoteCaller implements RemoteCaller 
 	
 	private final AtomicInteger inProgress = Metrics.gauge("remote.in-progress", 
 			new AtomicInteger());
+	private final Counter errorsCounter = Metrics.counter("remote.errors");
 
 	/**
 	 * latency goes up so many msec per request over limit1
@@ -42,7 +45,9 @@ public class SystemSlowerUnderLoadEmulatingRemoteCaller implements RemoteCaller 
 	
 	@Override
 	public Mono<Reply> execute() {
+		
 		int currentInProgress = inProgress.incrementAndGet();
+		
 		/*
 		 * simulate a system that gets slower with load over a specific point,
 		 * and then times out internally
@@ -50,11 +55,15 @@ public class SystemSlowerUnderLoadEmulatingRemoteCaller implements RemoteCaller 
 		long latency = Math.round(latencyBaseMsec+latencyMultiplier*Math.max(0,
 				Math.min(currentInProgress,limitTwo) - limitOne));
 		return Mono.delay(Duration.ofMillis(latency))//
+				.name("remote.reactor")//
+				.metrics()//
 				.flatMap( i ->
 					currentInProgress>limitTwo ? 
 							Mono.error(() -> new RuntimeException("timeout")) :
-								Mono.just(new Reply("hello world")))
-				.doFinally(s -> inProgress.decrementAndGet());
+								Mono.just(new Reply("hello world")))//
+				.doOnError(t -> errorsCounter.increment())//
+				.doFinally(s -> inProgress.decrementAndGet())//
+				;
 	}
 
 }
