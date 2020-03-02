@@ -1,0 +1,29 @@
+#management.endpoints.web.exposure.include=info,health,metrics,circuitbreakers
+management.endpoints.web.exposure.include: '*'
+management.endpoint.health.show-details: always
+
+
+management.metrics.export.influx:
+    db: boot
+    userName: user
+    password: pass
+    uri: http://localhost:8086
+    step: PT15s
+    autoCreateDb: false
+
+
+resilience4j.bulkhead.instances.slow:
+  maxConcurrentCalls: 1000
+  maxWaitDuration: 100ms
+
+resilience4j.circuitbreaker.configs.default:
+  slidingWindowSize: 100
+  permittedNumberOfCallsInHalfOpenState: 10
+  waitDurationInOpenState: 10000
+  failureRateThreshold: 60
+  eventConsumerBufferSize: 10
+  registerHealthIndicator: true
+resilience4j.circuitbreaker.instances.slow:
+  baseConfig: default
+  waitDurationInOpenState: 5000
+
