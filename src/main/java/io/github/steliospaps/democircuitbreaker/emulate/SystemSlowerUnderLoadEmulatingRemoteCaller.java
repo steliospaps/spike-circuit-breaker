@@ -46,18 +46,21 @@ public class SystemSlowerUnderLoadEmulatingRemoteCaller implements RemoteCaller 
 	@Override
 	public Mono<Reply> execute() {
 		
-		int currentInProgress = inProgress.incrementAndGet();
-		
-		/*
-		 * simulate a system that gets slower with load over a specific point,
-		 * and then times out internally
-		 */
-		long latency = Math.round(latencyBaseMsec+latencyMultiplier*Math.max(0,
-				Math.min(currentInProgress,limitTwo) - limitOne));
-		return Mono.delay(Duration.ofMillis(latency))//
+		return Mono.just(1)//
+				.flatMap(i -> {
+					int currentInProgress = inProgress.incrementAndGet();
+					/*
+					 * simulate a system that gets slower with load over a specific point,
+					 * and then times out internally
+					 */
+					long latency = Math.round(latencyBaseMsec+latencyMultiplier*Math.max(0,
+							Math.min(currentInProgress,limitTwo) - limitOne));
+					return Mono.just(currentInProgress)//
+							.delayElement(Duration.ofMillis(latency));
+				})
 				.name("remote.reactor")//
 				.metrics()//
-				.flatMap( i ->
+				.flatMap( currentInProgress ->
 					currentInProgress>limitTwo ? 
 							Mono.error(() -> new RuntimeException("timeout")) :
 								Mono.just(new Reply("hello world")))//
